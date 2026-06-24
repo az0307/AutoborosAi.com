@@ -1,51 +1,73 @@
-# autoborosai.com
+# React + TypeScript + Vite
 
-Public website and application for [autoborosai.com.au](https://autoborosai.com.au) — the AutoBoros AI automation platform.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Stack
+Currently, two official plugins are available:
 
-| Layer | Tech |
-|-------|------|
-| Frontend | React 19 + Vite + TypeScript + Tailwind CSS + shadcn/ui |
-| Backend | Hono (Node) + tRPC + Drizzle ORM + MySQL2 |
-| Auth | JWT via `jose` |
-| State | TanStack Query v5 |
-| AI | Kimi AI integration |
-| Deployment | Node production server (`dist/boot.js`) |
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Development
+## React Compiler
 
-```bash
-npm install
-npm run dev      # frontend + backend dev server
-npm run build    # vite build + esbuild API server
-npm start        # production: node dist/boot.js
-npm run check    # TypeScript
-npm run lint     # ESLint
-npm test         # Vitest
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Database
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm run db:generate   # generate Drizzle migration
-npm run db:migrate    # run migrations
-npm run db:push       # schema sync (dev only)
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-## Environment
-
-```
-DATABASE_URL=mysql://user:pass@host:3306/dbname
-JWT_SECRET=<random 32+ chars>
-KIMI_API_KEY=<kimi ai api key>
-NODE_ENV=development
-```
-
-Copy `.env.local.example` → `.env.local` for local dev. Never commit `.env.local`.
-
-## Related
-
-- [AutoBoros engine](https://github.com/az0307/Aurora-AI-Agency/tree/main/autoboros) — FastAPI backend + React cockpit
-- [Nexus Dashboard](https://github.com/az0307/autoborosai-dashboard) — ops monitoring (Next.js)
-- [AutoBoros product](https://github.com/az0307/AutoBoros.AI-) — product docs & roadmap
