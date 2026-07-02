@@ -54,7 +54,14 @@ api/                    Backend (Hono + tRPC)
 db/                     Drizzle ORM
   schema.ts             Table definitions
   index.ts              Drizzle client
+
+contracts/              Shared frontend/backend contracts
+  types.ts              Shared TypeScript types
+  constants.ts          Shared constants
+  errors.ts             Shared error definitions
 ```
+
+Keep cross-cutting types, constants, and error shapes in `contracts/` so the React frontend and the Hono/tRPC backend share one source of truth rather than redefining them.
 
 ## Environment Variables
 
