@@ -36,7 +36,7 @@ npm run db:push      # drizzle-kit push (schema sync, dev only)
 
 ## Architecture
 
-```
+```text
 src/                    Frontend (React 19 / Vite)
   client.ts             tRPC client
   main.tsx              React entry
@@ -65,7 +65,7 @@ Keep cross-cutting types, constants, and error shapes in `contracts/` so the Rea
 
 ## Environment Variables
 
-```
+```text
 DATABASE_URL=mysql://user:pass@host:3306/dbname
 JWT_SECRET=<random 32+ chars>  # never commit; use hosting platform secrets
 KIMI_API_KEY=<kimi api key>
