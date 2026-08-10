@@ -36,7 +36,7 @@ npm run db:push      # drizzle-kit push (schema sync, dev only)
 
 ## Architecture
 
-```
+```text
 src/                    Frontend (React 19 / Vite)
   client.ts             tRPC client
   main.tsx              React entry
@@ -54,11 +54,18 @@ api/                    Backend (Hono + tRPC)
 db/                     Drizzle ORM
   schema.ts             Table definitions
   index.ts              Drizzle client
+
+contracts/              Shared frontend/backend contracts
+  types.ts              Shared TypeScript types
+  constants.ts          Shared constants
+  errors.ts             Shared error definitions
 ```
+
+Keep cross-cutting types, constants, and error shapes in `contracts/` so the React frontend and the Hono/tRPC backend share one source of truth rather than redefining them.
 
 ## Environment Variables
 
-```
+```text
 DATABASE_URL=mysql://user:pass@host:3306/dbname
 JWT_SECRET=<random 32+ chars>  # never commit; use hosting platform secrets
 KIMI_API_KEY=<kimi api key>
