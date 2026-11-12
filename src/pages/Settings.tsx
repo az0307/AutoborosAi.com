@@ -64,6 +64,9 @@ export default function Settings() {
               Add your AI provider API keys. Keys are encrypted and stored
               securely. At least one key is required for the AI tools to work.
             </p>
+            <p className="text-[12px] text-[var(--text-secondary)] mb-4">
+              If you saved a key before the security update, re-enter it here.
+            </p>
 
             {!isAuthenticated && (
               <div
