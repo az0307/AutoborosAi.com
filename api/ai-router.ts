@@ -4,17 +4,7 @@ import { getDb } from "./queries/connection";
 import { apiKeys } from "@db/schema";
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-
-const ENC_KEY = process.env.APP_SECRET || "default-key-change-me";
-
-function xorDecrypt(encrypted: string, key: string): string {
-  const text = Buffer.from(encrypted, "base64").toString("binary");
-  let result = "";
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  return result;
-}
+import { decryptProviderKey, LegacyProviderKeyError } from "./lib/provider-key-crypto";
 
 interface ProviderConfig {
   baseUrl: string;
@@ -108,7 +98,14 @@ export const aiRouter = createRouter({
           .limit(1);
 
         if (keys.length > 0) {
-          apiKey = xorDecrypt(keys[0].apiKey, ENC_KEY);
+          try {
+            apiKey = decryptProviderKey(keys[0].apiKey, { userId: ctx.user.id, provider: input.provider });
+          } catch (error) {
+            if (error instanceof LegacyProviderKeyError) {
+              throw new TRPCError({ code: "PRECONDITION_FAILED", message: error.message });
+            }
+            throw error;
+          }
         }
       }
 

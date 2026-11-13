@@ -3,27 +3,8 @@ import { createRouter, authedQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import { apiKeys } from "@db/schema";
 import { eq, and } from "drizzle-orm";
-
-// Simple XOR encryption for storing API keys
-// In production, use a proper encryption service
-const ENC_KEY = process.env.APP_SECRET || "default-key-change-me";
-
-function xorEncrypt(text: string, key: string): string {
-  let result = "";
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  return Buffer.from(result).toString("base64");
-}
-
-function xorDecrypt(encrypted: string, key: string): string {
-  const text = Buffer.from(encrypted, "base64").toString("binary");
-  let result = "";
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  return result;
-}
+import { TRPCError } from "@trpc/server";
+import { decryptProviderKey, encryptProviderKey, LegacyProviderKeyError } from "./lib/provider-key-crypto";
 
 export const apiKeyRouter = createRouter({
   list: authedQuery.query(async ({ ctx }) => {
@@ -58,7 +39,14 @@ export const apiKeyRouter = createRouter({
         .limit(1);
 
       if (keys.length === 0) return null;
-      return { apiKey: xorDecrypt(keys[0].apiKey, ENC_KEY) };
+      try {
+        return { apiKey: decryptProviderKey(keys[0].apiKey, { userId: ctx.user.id, provider: input.provider }) };
+      } catch (error) {
+        if (error instanceof LegacyProviderKeyError) {
+          throw new TRPCError({ code: "PRECONDITION_FAILED", message: error.message });
+        }
+        throw error;
+      }
     }),
 
   upsert: authedQuery
@@ -71,7 +59,7 @@ export const apiKeyRouter = createRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      const encrypted = xorEncrypt(input.apiKey, ENC_KEY);
+      const encrypted = encryptProviderKey(input.apiKey, { userId: ctx.user.id, provider: input.provider });
 
       const existing = await db
         .select()
