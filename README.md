@@ -1,5 +1,17 @@
 # React + TypeScript + Vite
 
+## Provider API key encryption
+
+Set `API_KEY_ENCRYPTION_KEY` to a base64-encoded 32-byte random key in the
+backend secret store (generate one with `openssl rand -base64 32`). All backend
+instances must use the same value. Back it up securely: changing or losing it
+makes existing encrypted provider keys unreadable. Do not put it in frontend
+variables or commit it to Git.
+
+Keys stored by older releases used reversible XOR. After deploying this change,
+users must re-enter their provider keys in Settings; rotate previously stored
+provider keys where appropriate. Legacy values are not decrypted automatically.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
